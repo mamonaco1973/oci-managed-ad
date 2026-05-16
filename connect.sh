@@ -3,8 +3,6 @@ set -uo pipefail
 
 LOCAL_PORT=2222
 
-# Fall back to OCI CLI lookup if the apply is still in-progress and outputs
-# aren't written to state yet (Terraform only commits outputs on apply completion).
 BASTION_ID="${BASTION_ID:-$(cd 01-directory && terraform output -raw bastion_id 2>/dev/null)}"
 if [ -z "$BASTION_ID" ]; then
   echo "terraform output missing — looking up bastion via OCI CLI..."
@@ -60,6 +58,7 @@ while true; do
   [ "$STATE" = "ACTIVE" ] && break
   sleep 10
 done
+# OCI reports ACTIVE before the key is fully propagated
 sleep 15
 
 TUNNEL_CMD=$(echo "$SESSION_DATA" | jq -r '.data["ssh-metadata"].command' \
@@ -76,6 +75,5 @@ sleep 3
 
 ssh -o StrictHostKeyChecking=no \
   -o UserKnownHostsFile=/dev/null \
-  -i 01-directory/keys/Private_Key \
   -p "$LOCAL_PORT" \
-  ubuntu@localhost
+  Administrator@localhost

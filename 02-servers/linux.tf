@@ -3,7 +3,7 @@
 # ------------------------------------------------------------------------------
 # Purpose:
 #   - Deploys an Ubuntu 24.04 instance for AD integration and testing.
-#   - Joined to the Samba domain via realm join using admin credentials.
+#   - Joined to the Windows AD domain via realm join using Administrator credentials.
 #   - Launched into the public subnet with a public IP for SSH access.
 # ==============================================================================
 
@@ -39,4 +39,9 @@ resource "oci_core_instance" "linux_ad_instance" {
       dc_ip             = local.dc_private_ip
     }))
   }
+}
+
+output "linux_public_ip" {
+  description = "Public IP of the Linux AD client instance."
+  value       = oci_core_instance.linux_ad_instance.public_ip
 }

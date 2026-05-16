@@ -1,26 +1,26 @@
 # ==============================================================================
-# Mini Active Directory (mini-ad) - Module Invocation
+# Windows Active Directory - Module Invocation
 # ------------------------------------------------------------------------------
 # Purpose:
-#   - Invokes the reusable OCI mini-ad module to deploy a Samba 4 AD DC.
+#   - Invokes the reusable OCI windows-ad module to deploy a Windows Server 2022
+#     Active Directory Domain Controller.
 #
 # Notes:
 #   - Ensure NAT gateway and route table associations exist before provisioning
-#     (depends_on) — the DC bootstrap needs outbound internet for apt packages.
+#     (depends_on) — the DC bootstrap needs outbound internet for Windows Update
+#     checks and role installation sources.
 # ==============================================================================
 
-module "mini_ad" {
-  source = "github.com/mamonaco1973/module-oci-mini-ad"
+module "windows_ad" {
+  source = "github.com/mamonaco1973/module-oci-managed-ad"
 
   compartment_id = var.compartment_ocid
   tenancy_ocid   = var.tenancy_ocid
 
   # Domain identity
-  netbios      = var.netbios
-  realm        = var.realm
-  dns_zone     = var.dns_zone
-  user_base_dn = var.user_base_dn
-  users_json   = local.users_json
+  netbios  = var.netbios
+  realm    = var.realm
+  dns_zone = var.dns_zone
 
   # Authentication
   ad_admin_password = random_password.admin_password.result
@@ -30,31 +30,10 @@ module "mini_ad" {
   vcn_default_dhcp_options_id = oci_core_vcn.ad_vcn.default_dhcp_options_id
   subnet_ocid                 = oci_core_subnet.ad_subnet.id
 
-  # SSH key for management access
-  ssh_public_key = tls_private_key.ssh.public_key_openssh
-
   depends_on = [
     oci_core_nat_gateway.ad_nat,
     oci_core_route_table.private_rt,
   ]
-}
-
-# ==============================================================================
-# Seed user JSON — injected into the DC bootstrap to create demo accounts
-# ==============================================================================
-
-locals {
-  users_json = templatefile("./scripts/users.json.template", {
-    USER_BASE_DN = var.user_base_dn
-    DNS_ZONE     = var.dns_zone
-    REALM        = var.realm
-    NETBIOS      = var.netbios
-
-    jsmith_password = random_password.jsmith_password.result
-    edavis_password = random_password.edavis_password.result
-    rpatel_password = random_password.rpatel_password.result
-    akumar_password = random_password.akumar_password.result
-  })
 }
 
 # ==============================================================================
@@ -77,8 +56,34 @@ output "vm_subnet_ocid" {
 }
 
 output "admin_password" {
-  description = "AD admin password for domain join in 02-servers userdata."
+  description = "AD Administrator password for domain join in 02-servers userdata."
   value       = random_password.admin_password.result
+  sensitive   = true
+}
+
+output "ssh_public_key" {
+  description = "SSH public key for authorizing on Linux client instances."
+  value       = tls_private_key.ssh.public_key_openssh
+}
+
+output "dc_private_ip" {
+  description = "Private IP of the AD DC — used as the bastion session target."
+  value       = module.windows_ad.dns_server
+}
+
+output "bastion_id" {
+  description = "OCID of the OCI Bastion for creating RDP sessions."
+  value       = oci_bastion_bastion.ad_bastion.id
+}
+
+output "dns_zone" {
+  description = "AD DNS zone — used by get_password.sh to display fully-qualified usernames."
+  value       = var.dns_zone
+}
+
+output "windows_local_admin_password" {
+  description = "Local admin password for the Windows client instance — RDP fallback."
+  value       = random_password.windows_local_admin_password.result
   sensitive   = true
 }
 
@@ -100,30 +105,4 @@ output "rpatel_password" {
 output "akumar_password" {
   value     = random_password.akumar_password.result
   sensitive = true
-}
-
-output "ssh_public_key" {
-  description = "SSH public key for authorizing on client instances."
-  value       = tls_private_key.ssh.public_key_openssh
-}
-
-output "dc_private_ip" {
-  description = "Private IP of the AD DC — used as the bastion session target."
-  value       = module.mini_ad.dns_server
-}
-
-output "bastion_id" {
-  description = "OCID of the OCI Bastion for creating SSH sessions."
-  value       = oci_bastion_bastion.ad_bastion.id
-}
-
-output "dns_zone" {
-  description = "AD DNS zone — used by get_password.sh to display fully-qualified usernames."
-  value       = var.dns_zone
-}
-
-output "windows_local_admin_password" {
-  description = "Local admin password for the Windows instance — RDP fallback."
-  value       = random_password.windows_local_admin_password.result
-  sensitive   = true
 }

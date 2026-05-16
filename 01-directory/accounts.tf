@@ -22,15 +22,28 @@ resource "local_file" "public_key" {
 
 # ==============================================================================
 # AD Account Passwords
-# Passwords are generated here and passed to the DC via the module's user_data.
-# They are also output (sensitive) so 02-servers can read them via remote state.
+# Passed to the DC via module user_data and output (sensitive) for 02-servers.
 # ==============================================================================
 
 resource "random_password" "admin_password" {
   length           = 24
   special          = true
+  # Exclude characters that break PowerShell ConvertTo-SecureString when
+  # the password is interpolated as a plain string in the userdata template.
   override_special = "_-"
 }
+
+resource "random_password" "windows_local_admin_password" {
+  length           = 24
+  special          = true
+  override_special = "_-"
+}
+
+# ==============================================================================
+# Domain User Passwords
+# Generated here and passed to the DC post-reboot account creation script.
+# Stored as sensitive outputs so they can be retrieved from tfstate.
+# ==============================================================================
 
 resource "random_password" "jsmith_password" {
   length           = 24
@@ -54,10 +67,4 @@ resource "random_password" "akumar_password" {
   length           = 24
   special          = true
   override_special = "!@#$%"
-}
-
-resource "random_password" "windows_local_admin_password" {
-  length           = 24
-  special          = true
-  override_special = "_-"
 }

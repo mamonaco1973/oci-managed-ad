@@ -8,7 +8,7 @@ variable "compartment_ocid" {
 }
 
 variable "tenancy_ocid" {
-  description = "OCID of the root tenancy — required for dynamic group creation in the module."
+  description = "OCID of the root tenancy."
   type        = string
 }
 
@@ -34,14 +34,8 @@ variable "netbios" {
   default     = "MCLOUD"
 }
 
-variable "user_base_dn" {
-  description = "User base DN (e.g., CN=Users,DC=mcloud,DC=mikecloud,DC=com)"
-  type        = string
-  default     = "CN=Users,DC=mcloud,DC=mikecloud,DC=com"
-}
-
 variable "vcn_name" {
   description = "Display name for the VCN."
   type        = string
-  default     = "mini-ad-vcn"
+  default     = "windows-ad-vcn"
 }

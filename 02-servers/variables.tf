@@ -20,4 +20,3 @@ variable "netbios" {
   type        = string
   default     = "MCLOUD"
 }
-

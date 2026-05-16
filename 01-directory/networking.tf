@@ -1,15 +1,15 @@
 # ==============================================================================
-# Network Baseline: mini-AD VCN
+# Network Baseline: Windows AD VCN
 # ------------------------------------------------------------------------------
 # Purpose:
-#   - Builds the VCN for the mini-AD quick start.
+#   - Builds the VCN for the Windows AD deployment.
 #
 # Scope:
 #   - One VCN with:
-#       - Two public "vm" subnets for client workloads.
-#       - One private "ad" subnet for the Samba 4 domain controller.
+#       - One public "vm" subnet for client workloads.
+#       - One private "ad" subnet for the Windows domain controller.
 #   - Internet egress:
-#       - Public subnets route to an Internet Gateway.
+#       - Public subnet routes to an Internet Gateway.
 #       - Private subnet routes to a NAT Gateway for outbound-only access.
 #
 # Notes:
@@ -25,8 +25,7 @@ resource "oci_core_vcn" "ad_vcn" {
   compartment_id = var.compartment_ocid
   cidr_block     = "10.0.0.0/24"
   display_name   = var.vcn_name
-  # dns_label must be alphanumeric <= 15 chars
-  dns_label      = "miniadvcn"
+  dns_label      = "winadvcn"
 }
 
 # ==============================================================================

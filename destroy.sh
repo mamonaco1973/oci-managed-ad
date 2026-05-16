@@ -1,9 +1,9 @@
 #!/bin/bash
 # ==============================================================================
-# destroy.sh - Mini-AD Infrastructure Teardown (OCI)
+# destroy.sh - Windows AD Infrastructure Teardown (OCI)
 # ------------------------------------------------------------------------------
 # Purpose:
-#   - Destroys the mini-AD environment in controlled order:
+#   - Destroys the Windows AD environment in controlled order:
 #       1. Client compute instances (02-servers).
 #       2. Active Directory resources and networking (01-directory).
 #

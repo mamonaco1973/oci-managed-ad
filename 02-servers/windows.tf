@@ -2,7 +2,7 @@
 # OCI Compute Instance: Windows AD Client
 # ------------------------------------------------------------------------------
 # Purpose:
-#   - Deploys a Windows Server 2022 instance joined to the mini-AD domain.
+#   - Deploys a Windows Server 2022 instance joined to the Windows AD domain.
 #   - Bootstrapped via cloudbase-init PowerShell user_data.
 #   - Launched into the public subnet for RDP access.
 # ==============================================================================
@@ -35,6 +35,10 @@ resource "oci_core_instance" "windows_ad_instance" {
       windows_local_admin_password = local.windows_local_admin_password
       domain_fqdn                  = var.dns_zone
       netbios                      = var.netbios
+      jsmith_password              = local.jsmith_password
+      edavis_password              = local.edavis_password
+      rpatel_password              = local.rpatel_password
+      akumar_password              = local.akumar_password
     }))
   }
 }

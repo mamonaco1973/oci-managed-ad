@@ -1,10 +1,10 @@
 #!/bin/bash
 # ==============================================================================
-# apply.sh - Mini-AD Infrastructure Deployment (OCI)
+# apply.sh - Windows AD Infrastructure Deployment (OCI)
 # ------------------------------------------------------------------------------
 # Purpose:
-#   - Provisions the mini-AD environment in two ordered phases:
-#       1. Active Directory (Samba 4) deployment via the OCI mini-ad module.
+#   - Provisions the Windows AD environment in two ordered phases:
+#       1. Active Directory (Windows Server 2022) deployment via the module.
 #       2. Dependent OCI compute instances (Linux + Windows clients).
 #
 # Fast-Fail Behavior:
@@ -41,6 +41,7 @@ terraform init
 terraform apply -auto-approve
 
 cd ..
+exit 0
 
 # ------------------------------------------------------------------------------
 # Phase 2: Client Instances (Linux + Windows)

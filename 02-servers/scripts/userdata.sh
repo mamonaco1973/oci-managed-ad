@@ -28,7 +28,7 @@ sleep 2
 iptables -I INPUT -s 0.0.0.0/0 -j ACCEPT
 
 # Credentials and config injected by Terraform via templatefile
-ADMIN_USERNAME="Admin"
+ADMIN_USERNAME="Administrator"
 ADMIN_PASSWORD="${admin_password}"
 DOMAIN_FQDN="${domain_fqdn}"
 
@@ -58,7 +58,6 @@ until curl -fsS --max-time 10 https://us.archive.ubuntu.com/ >/dev/null 2>&1; do
 done
 echo "Network ready: $(date -Is)"
 
-# Packages
 # Rewrite apt sources — avoids ubuntu.com DDoS issues on OCI
 sed -i 's|http://archive.ubuntu.com|http://us.archive.ubuntu.com|g' /etc/apt/sources.list.d/*.sources 2>/dev/null || true
 sed -i 's|http://security.ubuntu.com|http://us.archive.ubuntu.com|g' /etc/apt/sources.list.d/*.sources 2>/dev/null || true
@@ -77,20 +76,14 @@ for i in {1..20}; do
   sleep 30
 done
 apt-get install -y \
-  less curl jq python3-venv \
+  less curl jq \
   realmd sssd-ad sssd-tools libnss-sss libpam-sss \
   adcli samba-common-bin samba-libs \
   oddjob oddjob-mkhomedir packagekit krb5-user \
   nano vim iptables-persistent
 
-# Install OCI CLI into a venv — avoids conflict with Debian-managed urllib3
-# which has no RECORD file and blocks pip's dependency resolution.
-python3 -m venv /opt/oci-venv
-/opt/oci-venv/bin/pip install --quiet oci-cli
-ln -sf /opt/oci-venv/bin/oci /usr/local/bin/oci
-
-# Wait for DC Kerberos — DNS resolving the domain is not enough; the full AD
-# stack (Kerberos, LDAP) takes longer after the DC reboots post-provision.
+# Wait for DC Kerberos — DNS resolving the domain is not enough; Windows AD DS
+# takes a few extra minutes to initialize Kerberos after the post-promotion reboot.
 echo "Waiting for DC Kerberos on $DOMAIN_FQDN..."
 until echo "$ADMIN_PASSWORD" | kinit "$ADMIN_USERNAME@${domain_fqdn_upper}" 2>/dev/null; do
   echo "Kerberos not ready yet, retrying in 30s..."
@@ -139,10 +132,10 @@ pam-auth-update --enable mkhomedir || true
 systemctl restart sssd || true
 systemctl restart ssh || systemctl restart sshd || true
 
-# Sudoers for linux-admins group (idempotent)
-SUDO_FILE=/etc/sudoers.d/10-linux-admins
+# Sudoers for domain-admins group (idempotent)
+SUDO_FILE=/etc/sudoers.d/10-domain-admins
 if [ ! -f "$SUDO_FILE" ]; then
-  echo "%linux-admins ALL=(ALL) NOPASSWD:ALL" > "$SUDO_FILE"
+  echo "%domain\ admins ALL=(ALL) NOPASSWD:ALL" > "$SUDO_FILE"
   chmod 440 "$SUDO_FILE"
 fi
 
