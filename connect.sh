@@ -1,5 +1,5 @@
 #!/bin/bash
-set -uo pipefail
+set -euo pipefail
 
 LOCAL_PORT=2222
 
@@ -19,6 +19,11 @@ fi
 
 DC_IP=$(cd 01-directory && terraform output -raw dc_private_ip 2>/dev/null)
 TARGET_IP="${1:-$DC_IP}"
+
+if [ -z "$TARGET_IP" ]; then
+  echo "ERROR: could not determine DC private IP — has 01-directory been applied?" >&2
+  exit 1
+fi
 
 echo "Target: $TARGET_IP"
 
