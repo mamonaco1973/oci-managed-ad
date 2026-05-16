@@ -1,5 +1,5 @@
 #!/bin/bash
-set -euo pipefail
+set -uo pipefail
 
 LOCAL_PORT=2222
 
