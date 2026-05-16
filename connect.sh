@@ -21,7 +21,24 @@ DC_IP=$(cd 01-directory && terraform output -raw dc_private_ip 2>/dev/null)
 TARGET_IP="${1:-$DC_IP}"
 
 if [ -z "$TARGET_IP" ]; then
-  echo "ERROR: could not determine DC private IP — has 01-directory been applied?" >&2
+  echo "terraform output missing — looking up DC private IP via OCI CLI..."
+  COMPARTMENT_ID="${OCI_COMPARTMENT_ID:-$(awk -F= '/^tenancy/{print $2}' ~/.oci/config | tr -d ' ')}"
+  DC_INSTANCE_ID=$(oci compute instance list \
+    --compartment-id "$COMPARTMENT_ID" \
+    --display-name "windows-ad-dc-mcloud" \
+    --lifecycle-state RUNNING \
+    --query 'data[0].id' \
+    --raw-output 2>/dev/null)
+  if [ -n "$DC_INSTANCE_ID" ]; then
+    TARGET_IP=$(oci compute instance list-vnics \
+      --instance-id "$DC_INSTANCE_ID" \
+      --query 'data[0]."private-ip"' \
+      --raw-output 2>/dev/null)
+  fi
+fi
+
+if [ -z "$TARGET_IP" ]; then
+  echo "ERROR: could not determine DC private IP" >&2
   exit 1
 fi
 
