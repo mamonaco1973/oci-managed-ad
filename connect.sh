@@ -87,6 +87,13 @@ TUNNEL_CMD=$(echo "$SESSION_DATA" | jq -r '.data["ssh-metadata"].command' \
   | sed "s|<privateKey>|${TMP_KEY}|g" \
   | sed "s|<localPort>|${LOCAL_PORT}|g")
 
+ADMIN_PASS=$(cd 01-directory && terraform output -raw admin_password 2>/dev/null)
+if [ -n "$ADMIN_PASS" ]; then
+  echo ""
+  echo "Administrator password: ${ADMIN_PASS}"
+  echo ""
+fi
+
 echo "Opening tunnel..."
 # Kill any stale tunnel from a previous run before binding the port
 fuser -k "${LOCAL_PORT}/tcp" >/dev/null 2>&1 || true
@@ -97,5 +104,7 @@ sleep 3
 
 ssh -o StrictHostKeyChecking=no \
   -o UserKnownHostsFile=/dev/null \
+  -o PreferredAuthentications=password \
+  -o PubkeyAuthentication=no \
   -p "$LOCAL_PORT" \
   Administrator@localhost
