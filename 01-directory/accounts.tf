@@ -26,20 +26,20 @@ resource "local_file" "public_key" {
 # ==============================================================================
 
 resource "random_password" "administrator_password" {
-  length           = 24
+  length           = 23
   special          = true
   # Restrict specials — password is interpolated into PS1 template strings
   override_special = "_-"
 }
 
 resource "random_password" "admin_domain_password" {
-  length           = 24
+  length           = 23
   special          = true
   override_special = "_-"
 }
 
 resource "random_password" "windows_local_admin_password" {
-  length           = 24
+  length           = 23
   special          = true
   override_special = "_-"
 }
@@ -51,26 +51,42 @@ resource "random_password" "windows_local_admin_password" {
 # ==============================================================================
 
 resource "random_password" "jsmith_password" {
-  length           = 24
+  length           = 23
   special          = true
   # $ breaks PS1 double-quoted string interpolation — exclude it
   override_special = "!@#%"
 }
 
 resource "random_password" "edavis_password" {
-  length           = 24
+  length           = 23
   special          = true
   override_special = "!@#%"
 }
 
 resource "random_password" "rpatel_password" {
-  length           = 24
+  length           = 23
   special          = true
   override_special = "!@#%"
 }
 
 resource "random_password" "akumar_password" {
-  length           = 24
+  length           = 23
   special          = true
   override_special = "!@#%"
+}
+
+# ==============================================================================
+# Safe password locals
+# Prepend "A" so the first character is always a known-safe uppercase letter.
+# Guarantees no password starts with "-" and satisfies Windows complexity.
+# ==============================================================================
+
+locals {
+  administrator_password       = "A${random_password.administrator_password.result}"
+  admin_domain_password        = "A${random_password.admin_domain_password.result}"
+  windows_local_admin_password = "A${random_password.windows_local_admin_password.result}"
+  jsmith_password              = "A${random_password.jsmith_password.result}"
+  edavis_password              = "A${random_password.edavis_password.result}"
+  rpatel_password              = "A${random_password.rpatel_password.result}"
+  akumar_password              = "A${random_password.akumar_password.result}"
 }

@@ -23,9 +23,9 @@ module "windows_ad" {
   dns_zone = var.dns_zone
 
   # Authentication
-  administrator_password       = random_password.administrator_password.result
-  admin_domain_password        = random_password.admin_domain_password.result
-  windows_local_admin_password = random_password.windows_local_admin_password.result
+  administrator_password       = local.administrator_password
+  admin_domain_password        = local.admin_domain_password
+  windows_local_admin_password = local.windows_local_admin_password
 
   # Networking — DC placed in private subnet; module updates VCN default DHCP
   vcn_id                      = oci_core_vcn.ad_vcn.id
@@ -59,13 +59,13 @@ output "vm_subnet_ocid" {
 
 output "administrator_password" {
   description = "Built-in Administrator account password — SSH/RDP into DC."
-  value       = random_password.administrator_password.result
+  value       = local.administrator_password
   sensitive   = true
 }
 
 output "admin_domain_password" {
   description = "Password for the Admin domain admin account."
-  value       = random_password.admin_domain_password.result
+  value       = local.admin_domain_password
   sensitive   = true
 }
 
@@ -91,26 +91,26 @@ output "dns_zone" {
 
 output "windows_local_admin_password" {
   description = "Local admin password for the Windows client instance — RDP fallback."
-  value       = random_password.windows_local_admin_password.result
+  value       = local.windows_local_admin_password
   sensitive   = true
 }
 
 output "jsmith_password" {
-  value     = random_password.jsmith_password.result
+  value     = local.jsmith_password
   sensitive = true
 }
 
 output "edavis_password" {
-  value     = random_password.edavis_password.result
+  value     = local.edavis_password
   sensitive = true
 }
 
 output "rpatel_password" {
-  value     = random_password.rpatel_password.result
+  value     = local.rpatel_password
   sensitive = true
 }
 
 output "akumar_password" {
-  value     = random_password.akumar_password.result
+  value     = local.akumar_password
   sensitive = true
 }
