@@ -8,10 +8,11 @@ Start-Transcript -Path $Log -Append -Force
 try {
     Write-Output "Starting jumpbox bootstrap at $(Get-Date -Format o)"
 
-    Write-Output "Enabling RDP"
+    Write-Output "Enabling RDP with NLA"
     Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' `
         -Name 'fDenyTSConnections' -Value 0
-    # Leave UserAuthentication=0 (no NLA) - allows password-change flow on first login
+    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' `
+        -Name 'UserAuthentication' -Value 1
     Enable-NetFirewallRule -DisplayGroup 'Remote Desktop'
 
     Write-Output "Enabling and setting Administrator password"
