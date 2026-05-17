@@ -12,7 +12,7 @@
 # ==============================================================================
 
 module "windows_ad" {
-  source = "../../module-oci-managed-ad"
+  source = "github.com/mamonaco1973/module-oci-managed-ad"
 
   compartment_id = var.compartment_ocid
   tenancy_ocid   = var.tenancy_ocid
