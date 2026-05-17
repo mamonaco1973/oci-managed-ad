@@ -25,9 +25,8 @@ if [ -z "$TARGET_IP" ]; then
   COMPARTMENT_ID="${OCI_COMPARTMENT_ID:-$(awk -F= '/^tenancy/{print $2}' ~/.oci/config | tr -d ' ')}"
   DC_INSTANCE_ID=$(oci compute instance list \
     --compartment-id "$COMPARTMENT_ID" \
-    --display-name "ad-dc1-mcloud" \
     --lifecycle-state RUNNING \
-    --query 'data[0].id' \
+    --query "data[?starts_with(\"display-name\", 'ad-dc1-')].id | [0]" \
     --raw-output 2>/dev/null)
   if [ -n "$DC_INSTANCE_ID" ]; then
     TARGET_IP=$(oci compute instance list-vnics \
