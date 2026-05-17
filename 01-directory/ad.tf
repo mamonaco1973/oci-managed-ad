@@ -12,7 +12,7 @@
 # ==============================================================================
 
 module "windows_ad" {
-  source = "github.com/mamonaco1973/module-oci-managed-ad"
+  source = "../../module-oci-managed-ad"
 
   compartment_id = var.compartment_ocid
   tenancy_ocid   = var.tenancy_ocid
@@ -27,10 +27,11 @@ module "windows_ad" {
   admin_domain_password        = random_password.admin_domain_password.result
   windows_local_admin_password = random_password.windows_local_admin_password.result
 
-  # Networking — DC placed in private subnet; module updates VCN default DHCP
+  # Networking — DC on public subnet with public IP for debug access via RDP
   vcn_id                      = oci_core_vcn.ad_vcn.id
   vcn_default_dhcp_options_id = oci_core_vcn.ad_vcn.default_dhcp_options_id
-  subnet_ocid                 = oci_core_subnet.ad_subnet.id
+  subnet_ocid                 = oci_core_subnet.vm_subnet.id
+  assign_public_ip            = true
 
   depends_on = [
     oci_core_nat_gateway.ad_nat,
@@ -77,6 +78,11 @@ output "ssh_public_key" {
 output "dc_private_ip" {
   description = "Private IP of the AD DC — used as the bastion session target."
   value       = module.windows_ad.dns_server
+}
+
+output "dc_public_ip" {
+  description = "Public IP of the DC — only set when assign_public_ip = true."
+  value       = module.windows_ad.dc_public_ip
 }
 
 output "bastion_id" {
