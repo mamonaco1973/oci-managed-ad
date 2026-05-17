@@ -53,23 +53,24 @@ resource "random_password" "windows_local_admin_password" {
 resource "random_password" "jsmith_password" {
   length           = 24
   special          = true
-  override_special = "!@#$%"
+  # $ breaks PS1 double-quoted string interpolation — exclude it
+  override_special = "!@#%"
 }
 
 resource "random_password" "edavis_password" {
   length           = 24
   special          = true
-  override_special = "!@#$%"
+  override_special = "!@#%"
 }
 
 resource "random_password" "rpatel_password" {
   length           = 24
   special          = true
-  override_special = "!@#$%"
+  override_special = "!@#%"
 }
 
 resource "random_password" "akumar_password" {
   length           = 24
   special          = true
-  override_special = "!@#$%"
+  override_special = "!@#%"
 }

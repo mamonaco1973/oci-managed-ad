@@ -10,18 +10,22 @@ try {
     Write-Output "Starting PowerShell user-data at $(Get-Date -Format o)"
 
     # ----------------------------------------------------------------------
-    # Local fallback account for RDP if domain join fails
+    # OS baseline
     # ----------------------------------------------------------------------
     Write-Output "Setting local windows_local_admin account for RDP fallback"
     $localPassword = "${windows_local_admin_password}" | ConvertTo-SecureString -AsPlainText -Force
     New-LocalUser -Name "windows_local_admin" -Password $localPassword `
         -PasswordNeverExpires -ErrorAction SilentlyContinue
+    # Set-LocalUser ensures the password is applied even if the account already exists
+    Set-LocalUser -Name "windows_local_admin" -Password $localPassword -PasswordNeverExpires $true
     Add-LocalGroupMember -Group "Administrators"         -Member "windows_local_admin" -ErrorAction SilentlyContinue
     Add-LocalGroupMember -Group "Remote Desktop Users"   -Member "windows_local_admin" -ErrorAction SilentlyContinue
 
-    # ----------------------------------------------------------------------
-    # OS baseline
-    # ----------------------------------------------------------------------
+    Write-Output "Enabling NLA so MSTSC prompts for credentials before session starts"
+    Set-ItemProperty `
+        -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' `
+        -Name "UserAuthentication" -Value 1
+
     Write-Output "Disabling IPv6 — OCI subnets are IPv4-only"
     Get-NetAdapterBinding -ComponentID ms_tcpip6 | Disable-NetAdapterBinding
 
@@ -156,11 +160,6 @@ try {
             Write-Output "mcloud-users already in Remote Desktop Users"
         } else { throw }
     }
-
-    Write-Output "Enabling NLA so MSTSC prompts for credentials before session starts"
-    Set-ItemProperty `
-        -Path 'HKLM:\System\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' `
-        -Name "UserAuthentication" -Value 1
 
     # ----------------------------------------------------------------------
     # Reboot only if we just joined
