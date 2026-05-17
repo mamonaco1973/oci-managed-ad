@@ -87,10 +87,10 @@ TUNNEL_CMD=$(echo "$SESSION_DATA" | jq -r '.data["ssh-metadata"].command' \
   | sed "s|<privateKey>|${TMP_KEY}|g" \
   | sed "s|<localPort>|${LOCAL_PORT}|g")
 
-ADMIN_PASS=$(cd 01-directory && terraform output -raw administrator_password 2>/dev/null)
+ADMIN_PASS=$(cd 01-directory && terraform output -raw windows_local_admin_password 2>/dev/null)
 if [ -n "$ADMIN_PASS" ]; then
   echo ""
-  echo "Administrator password: ${ADMIN_PASS}"
+  echo "windows_local_admin password: ${ADMIN_PASS}"
   echo ""
 fi
 
@@ -107,4 +107,4 @@ ssh -o StrictHostKeyChecking=no \
   -o PreferredAuthentications=password \
   -o PubkeyAuthentication=no \
   -p "$LOCAL_PORT" \
-  Administrator@localhost
+  windows_local_admin@localhost
