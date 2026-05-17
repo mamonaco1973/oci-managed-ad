@@ -53,6 +53,7 @@ Admin account passwords use `override_special = "_-"` — these are interpolated
 - `rdp-connect.sh` — Same pattern but forwards port 3389. Holds tunnel open until Ctrl+C.
 - `get_password.sh <user>` — Reads any password from tfstate.
   Valid users: `administrator`, `admin`, `windows_local_admin`, `jsmith`, `edavis`, `rpatel`, `akumar`
+  `windows_local_admin` works for both the DC and the jumpbox.
 
 ## Module Source
 

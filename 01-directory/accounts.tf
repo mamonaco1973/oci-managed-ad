@@ -44,12 +44,6 @@ resource "random_password" "windows_local_admin_password" {
   override_special = "_-"
 }
 
-resource "random_password" "jumpbox_admin_password" {
-  length           = 24
-  special          = true
-  override_special = "_-"
-}
-
 # ==============================================================================
 # Domain User Passwords
 # Generated here and passed to the DC post-reboot account creation script.
