@@ -8,11 +8,9 @@ Start-Transcript -Path $Log -Append -Force
 try {
     Write-Output "Starting jumpbox bootstrap at $(Get-Date -Format o)"
 
-    Write-Output "Enabling RDP with NLA"
+    Write-Output "Enabling RDP"
     Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' `
         -Name 'fDenyTSConnections' -Value 0
-    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' `
-        -Name 'UserAuthentication' -Value 1
     Enable-NetFirewallRule -DisplayGroup 'Remote Desktop'
 
     # ----------------------------------------------------------------------
