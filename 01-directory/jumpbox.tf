@@ -51,8 +51,3 @@ output "jumpbox_public_ip" {
   value       = oci_core_instance.jumpbox.public_ip
 }
 
-output "jumpbox_admin_password" {
-  description = "Administrator password for the jump box."
-  value       = random_password.jumpbox_admin_password.result
-  sensitive   = true
-}
