@@ -1,0 +1,31 @@
+<powershell>
+$ErrorActionPreference = 'Stop'
+$ProgressPreference   = 'SilentlyContinue'
+
+$Log = 'C:\ProgramData\jumpbox-userdata.log'
+Start-Transcript -Path $Log -Append -Force
+
+try {
+    Write-Output "Starting jumpbox bootstrap at $(Get-Date -Format o)"
+
+    Write-Output "Enabling RDP with Network Level Authentication"
+    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server' `
+        -Name 'fDenyTSConnections' -Value 0
+    # NLA forces credential prompt before the session is established
+    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Control\Terminal Server\WinStations\RDP-Tcp' `
+        -Name 'UserAuthentication' -Value 1
+    Enable-NetFirewallRule -DisplayGroup 'Remote Desktop'
+
+    Write-Output "Setting Administrator password"
+    $AdminPass = ConvertTo-SecureString "${JUMPBOX_ADMIN_PASS}" -AsPlainText -Force
+    Set-LocalUser -Name "Administrator" -Password $AdminPass -PasswordNeverExpires $true
+    # Clear must-change-password flag set by OCI on first boot
+    $user = [ADSI]"WinNT://./Administrator,user"
+    $user.PasswordExpired = 0
+    $user.SetInfo()
+
+} finally {
+    Write-Output "Jumpbox bootstrap finishing at $(Get-Date -Format o)"
+    Stop-Transcript | Out-Null
+}
+</powershell>

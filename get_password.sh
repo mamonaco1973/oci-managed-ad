@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-VALID_USERS="administrator admin windows_local_admin jsmith edavis rpatel akumar"
+VALID_USERS="administrator admin windows_local_admin jumpbox jsmith edavis rpatel akumar"
 
 if [ $# -ne 1 ]; then
   echo "Usage: $0 <user>"
@@ -15,6 +15,7 @@ case "$USER" in
   administrator)       OUTPUT="administrator_password" ;;
   admin)               OUTPUT="admin_domain_password" ;;
   windows_local_admin) OUTPUT="windows_local_admin_password" ;;
+  jumpbox)             OUTPUT="jumpbox_admin_password" ;;
   jsmith)              OUTPUT="jsmith_password" ;;
   edavis)              OUTPUT="edavis_password" ;;
   rpatel)              OUTPUT="rpatel_password" ;;
@@ -37,6 +38,7 @@ fi
 case "$USER" in
   administrator)       echo "Username : Administrator (built-in local/domain)" ;;
   windows_local_admin) echo "Username : windows_local_admin (local account on DC)" ;;
+  jumpbox)             echo "Username : Administrator (jump box local)" ;;
   *)                   echo "Username : ${USER}@${DNS_ZONE}" ;;
 esac
 echo "Password : ${PASSWORD}"
