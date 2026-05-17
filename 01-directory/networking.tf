@@ -91,6 +91,12 @@ resource "oci_core_security_list" "vm_sl" {
   display_name   = "vm-security-list"
 
   ingress_security_rules {
+    protocol  = "1"
+    source    = "0.0.0.0/0"
+    stateless = false
+  }
+
+  ingress_security_rules {
     protocol  = "6"
     source    = "0.0.0.0/0"
     stateless = false
