@@ -1,7 +1,7 @@
 #!/bin/bash
 set -uo pipefail
 
-LOCAL_PORT=2222
+LOCAL_PORT=3389
 
 BASTION_ID="${BASTION_ID:-$(cd 01-directory && terraform output -raw bastion_id 2>/dev/null)}"
 if [ -z "$BASTION_ID" ]; then
@@ -44,9 +44,6 @@ fi
 
 echo "Target: $TARGET_IP"
 
-# Generate a temporary RSA key for the bastion tunnel.
-# OCI Bastion rejects ECDSA — temp RSA key avoids dependency on the
-# Terraform-managed key pair entirely.
 TMP_DIR=$(mktemp -d /tmp/bastion_XXXXXX)
 TMP_KEY="$TMP_DIR/key"
 ssh-keygen -t rsa -b 4096 -f "$TMP_KEY" -N "" -q
@@ -60,7 +57,7 @@ trap cleanup EXIT
 
 echo "Creating bastion session..."
 
-TARGET_DETAILS="{\"targetResourcePrivateIpAddress\": \"${TARGET_IP}\", \"targetResourcePort\": 22, \"sessionType\": \"PORT_FORWARDING\"}"
+TARGET_DETAILS="{\"targetResourcePrivateIpAddress\": \"${TARGET_IP}\", \"targetResourcePort\": 3389, \"sessionType\": \"PORT_FORWARDING\"}"
 
 SESSION_JSON=$(oci bastion session create \
   --bastion-id "$BASTION_ID" \
@@ -87,12 +84,16 @@ TUNNEL_CMD=$(echo "$SESSION_DATA" | jq -r '.data["ssh-metadata"].command' \
   | sed "s|<privateKey>|${TMP_KEY}|g" \
   | sed "s|<localPort>|${LOCAL_PORT}|g")
 
-ADMIN_PASS=$(cd 01-directory && terraform output -raw administrator_password 2>/dev/null)
+ADMIN_PASS=$(cd 01-directory && terraform output -raw admin_password 2>/dev/null)
+echo ""
+echo "RDP to:    localhost:${LOCAL_PORT}"
+echo "Username:  Administrator"
 if [ -n "$ADMIN_PASS" ]; then
-  echo ""
-  echo "Administrator password: ${ADMIN_PASS}"
-  echo ""
+  echo "Password:  ${ADMIN_PASS}"
 fi
+echo ""
+echo "Press Ctrl+C to close the tunnel."
+echo ""
 
 echo "Opening tunnel..."
 # Kill any stale tunnel from a previous run before binding the port
@@ -100,11 +101,6 @@ fuser -k "${LOCAL_PORT}/tcp" >/dev/null 2>&1 || true
 sleep 1
 eval "$TUNNEL_CMD -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null" &
 TUNNEL_PID=$!
-sleep 3
 
-ssh -o StrictHostKeyChecking=no \
-  -o UserKnownHostsFile=/dev/null \
-  -o PreferredAuthentications=password \
-  -o PubkeyAuthentication=no \
-  -p "$LOCAL_PORT" \
-  Administrator@localhost
+# Keep tunnel open until user interrupts
+wait "$TUNNEL_PID"

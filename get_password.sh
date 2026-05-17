@@ -1,7 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-VALID_USERS="admin jsmith edavis rpatel akumar windows_local_admin"
+VALID_USERS="administrator admin windows_local_admin jsmith edavis rpatel akumar"
 
 if [ $# -ne 1 ]; then
   echo "Usage: $0 <user>"
@@ -12,12 +12,13 @@ fi
 USER="$1"
 
 case "$USER" in
-  admin)               OUTPUT="admin_password" ;;
+  administrator)       OUTPUT="administrator_password" ;;
+  admin)               OUTPUT="admin_domain_password" ;;
+  windows_local_admin) OUTPUT="windows_local_admin_password" ;;
   jsmith)              OUTPUT="jsmith_password" ;;
   edavis)              OUTPUT="edavis_password" ;;
   rpatel)              OUTPUT="rpatel_password" ;;
   akumar)              OUTPUT="akumar_password" ;;
-  windows_local_admin) OUTPUT="windows_local_admin_password" ;;
   *)
     echo "ERROR: Unknown user '$USER'"
     echo "Valid users: $VALID_USERS"
@@ -33,9 +34,9 @@ if [ -z "$PASSWORD" ]; then
   exit 1
 fi
 
-if [ "$USER" = "windows_local_admin" ]; then
-  echo "Username : windows_local_admin (local account)"
-else
-  echo "Username : ${USER}@${DNS_ZONE}"
-fi
+case "$USER" in
+  administrator)       echo "Username : Administrator (built-in local/domain)" ;;
+  windows_local_admin) echo "Username : windows_local_admin (local account on DC)" ;;
+  *)                   echo "Username : ${USER}@${DNS_ZONE}" ;;
+esac
 echo "Password : ${PASSWORD}"

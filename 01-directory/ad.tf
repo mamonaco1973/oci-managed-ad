@@ -23,7 +23,9 @@ module "windows_ad" {
   dns_zone = var.dns_zone
 
   # Authentication
-  ad_admin_password = random_password.admin_password.result
+  administrator_password       = random_password.administrator_password.result
+  admin_domain_password        = random_password.admin_domain_password.result
+  windows_local_admin_password = random_password.windows_local_admin_password.result
 
   # Networking — DC placed in private subnet; module updates VCN default DHCP
   vcn_id                      = oci_core_vcn.ad_vcn.id
@@ -55,9 +57,15 @@ output "vm_subnet_ocid" {
   value       = oci_core_subnet.vm_subnet.id
 }
 
-output "admin_password" {
-  description = "AD Administrator password for domain join in 02-servers userdata."
-  value       = random_password.admin_password.result
+output "administrator_password" {
+  description = "Built-in Administrator account password — SSH/RDP into DC."
+  value       = random_password.administrator_password.result
+  sensitive   = true
+}
+
+output "admin_domain_password" {
+  description = "Password for the Admin domain admin account."
+  value       = random_password.admin_domain_password.result
   sensitive   = true
 }
 

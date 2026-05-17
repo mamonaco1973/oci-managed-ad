@@ -25,11 +25,16 @@ resource "local_file" "public_key" {
 # Passed to the DC via module user_data and output (sensitive) for 02-servers.
 # ==============================================================================
 
-resource "random_password" "admin_password" {
+resource "random_password" "administrator_password" {
   length           = 24
   special          = true
-  # Exclude characters that break PowerShell ConvertTo-SecureString when
-  # the password is interpolated as a plain string in the userdata template.
+  # Restrict specials — password is interpolated into PS1 template strings
+  override_special = "_-"
+}
+
+resource "random_password" "admin_domain_password" {
+  length           = 24
+  special          = true
   override_special = "_-"
 }
 
