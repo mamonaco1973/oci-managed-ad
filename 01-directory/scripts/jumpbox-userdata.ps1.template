@@ -15,21 +15,15 @@ try {
         -Name 'UserAuthentication' -Value 1
     Enable-NetFirewallRule -DisplayGroup 'Remote Desktop'
 
-    Write-Output "Enabling and setting Administrator password"
-    $AdminPass = ConvertTo-SecureString "${JUMPBOX_ADMIN_PASS}" -AsPlainText -Force
-    Enable-LocalUser -Name "Administrator"
-    Set-LocalUser -Name "Administrator" -Password $AdminPass -PasswordNeverExpires $true
-    $user = [ADSI]"WinNT://./Administrator,user"
-    $user.PasswordExpired = 0
-    $user.SetInfo()
-
-    Write-Output "Clearing opc password expiry"
-    if (Get-LocalUser -Name "opc" -ErrorAction SilentlyContinue) {
-        Set-LocalUser -Name "opc" -Password $AdminPass -PasswordNeverExpires $true
-        $opc = [ADSI]"WinNT://./opc,user"
-        $opc.PasswordExpired = 0
-        $opc.SetInfo()
-    }
+    # ----------------------------------------------------------------------
+    # Dedicated local admin - avoids OCI's opc/Administrator account jank
+    # ----------------------------------------------------------------------
+    Write-Output "Creating windows_local_admin account"
+    $LocalPass = ConvertTo-SecureString "${JUMPBOX_LOCAL_ADMIN_PASS}" -AsPlainText -Force
+    New-LocalUser -Name "windows_local_admin" -Password $LocalPass `
+        -PasswordNeverExpires -ErrorAction SilentlyContinue
+    Add-LocalGroupMember -Group "Administrators"       -Member "windows_local_admin" -ErrorAction SilentlyContinue
+    Add-LocalGroupMember -Group "Remote Desktop Users" -Member "windows_local_admin" -ErrorAction SilentlyContinue
 
 } finally {
     Write-Output "Jumpbox bootstrap finishing at $(Get-Date -Format o)"

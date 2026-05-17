@@ -41,7 +41,7 @@ resource "oci_core_instance" "jumpbox" {
 
   metadata = {
     user_data = base64encode(templatefile("${path.module}/scripts/jumpbox-userdata.ps1.template", {
-      JUMPBOX_ADMIN_PASS = random_password.jumpbox_admin_password.result
+      JUMPBOX_LOCAL_ADMIN_PASS = random_password.jumpbox_admin_password.result
     }))
   }
 }

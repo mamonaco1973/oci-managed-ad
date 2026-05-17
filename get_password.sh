@@ -38,7 +38,7 @@ fi
 case "$USER" in
   administrator)       echo "Username : Administrator (built-in local/domain)" ;;
   windows_local_admin) echo "Username : windows_local_admin (local account on DC)" ;;
-  jumpbox)             echo "Username : Administrator (jump box local)" ;;
+  jumpbox)             echo "Username : windows_local_admin (jump box local)" ;;
   *)                   echo "Username : ${USER}@${DNS_ZONE}" ;;
 esac
 echo "Password : ${PASSWORD}"
