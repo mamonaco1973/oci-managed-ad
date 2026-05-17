@@ -28,7 +28,7 @@ sleep 2
 iptables -I INPUT -s 0.0.0.0/0 -j ACCEPT
 
 # Credentials and config injected by Terraform via templatefile
-ADMIN_USERNAME="Administrator"
+ADMIN_USERNAME="Admin"
 ADMIN_PASSWORD="${admin_password}"
 DOMAIN_FQDN="${domain_fqdn}"
 
@@ -76,11 +76,17 @@ for i in {1..20}; do
   sleep 30
 done
 apt-get install -y \
-  less curl jq \
+  less curl jq python3-venv \
   realmd sssd-ad sssd-tools libnss-sss libpam-sss \
   adcli samba-common-bin samba-libs \
   oddjob oddjob-mkhomedir packagekit krb5-user \
   nano vim iptables-persistent
+
+# Install OCI CLI into a venv — avoids conflict with Debian-managed urllib3
+# which has no RECORD file and blocks pip's dependency resolution.
+python3 -m venv /opt/oci-venv
+/opt/oci-venv/bin/pip install --quiet oci-cli
+ln -sf /opt/oci-venv/bin/oci /usr/local/bin/oci
 
 # Wait for DC Kerberos — DNS resolving the domain is not enough; Windows AD DS
 # takes a few extra minutes to initialize Kerberos after the post-promotion reboot.
@@ -133,9 +139,9 @@ systemctl restart sssd || true
 systemctl restart ssh || systemctl restart sshd || true
 
 # Sudoers for domain-admins group (idempotent)
-SUDO_FILE=/etc/sudoers.d/10-domain-admins
+SUDO_FILE=/etc/sudoers.d/10-linux-admins
 if [ ! -f "$SUDO_FILE" ]; then
-  echo "%domain\ admins ALL=(ALL) NOPASSWD:ALL" > "$SUDO_FILE"
+  echo "%linux-admins ALL=(ALL) NOPASSWD:ALL" > "$SUDO_FILE"
   chmod 440 "$SUDO_FILE"
 fi
 

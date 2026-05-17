@@ -55,7 +55,7 @@ try {
     # ----------------------------------------------------------------------
     $adminPassword = "${admin_password}" | ConvertTo-SecureString -AsPlainText -Force
     $cred = New-Object System.Management.Automation.PSCredential `
-        ("${netbios}\Administrator", $adminPassword)
+        ("${netbios}\Admin", $adminPassword)
 
     $didJoin = $false
     $cs = Get-CimInstance Win32_ComputerSystem
