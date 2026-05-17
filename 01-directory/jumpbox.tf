@@ -5,6 +5,7 @@
 # AD subnet. Use this to reach the DC when bastion SSH is unavailable.
 # ==============================================================================
 
+/*
 data "oci_core_images" "windows_jumpbox" {
   compartment_id           = var.compartment_ocid
   operating_system         = "Windows"
@@ -47,7 +48,7 @@ resource "oci_core_instance" "jumpbox" {
 }
 
 output "jumpbox_public_ip" {
-  description = "Public IP of the Windows jump box — RDP directly to this address."
+  description = "Public IP of the Windows jump box - RDP directly to this address."
   value       = oci_core_instance.jumpbox.public_ip
 }
-
+*/
