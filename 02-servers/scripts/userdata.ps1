@@ -91,7 +91,7 @@ try {
     }
 
     Write-Output "Ensuring AD groups exist"
-    New-AdGroupIfMissing "mcloud-users"  10001
+    New-AdGroupIfMissing "${lower(netbios)}-users"  10001
     New-AdGroupIfMissing "india"         10002
     New-AdGroupIfMissing "us"            10003
     New-AdGroupIfMissing "linux-admins"  10004
@@ -143,21 +143,21 @@ try {
     }
 
     Write-Output "Ensuring AD users exist"
-    New-AdUserIfMissing "jsmith"  "John"  "Smith" "John Smith"  "jsmith@${domain_fqdn}"  "${jsmith_password}"  @("mcloud-users","us","linux-admins")
-    New-AdUserIfMissing "edavis" "Emily" "Davis" "Emily Davis" "edavis@${domain_fqdn}" "${edavis_password}" @("mcloud-users","us")
-    New-AdUserIfMissing "rpatel" "Raj"   "Patel" "Raj Patel"   "rpatel@${domain_fqdn}"  "${rpatel_password}"  @("mcloud-users","india","linux-admins")
-    New-AdUserIfMissing "akumar" "Amit"  "Kumar" "Amit Kumar"  "akumar@${domain_fqdn}"  "${akumar_password}"  @("mcloud-users","india")
+    New-AdUserIfMissing "jsmith"  "John"  "Smith" "John Smith"  "jsmith@${domain_fqdn}"  "${jsmith_password}"  @("${lower(netbios)}-users","us","linux-admins")
+    New-AdUserIfMissing "edavis" "Emily" "Davis" "Emily Davis" "edavis@${domain_fqdn}" "${edavis_password}" @("${lower(netbios)}-users","us")
+    New-AdUserIfMissing "rpatel" "Raj"   "Patel" "Raj Patel"   "rpatel@${domain_fqdn}"  "${rpatel_password}"  @("${lower(netbios)}-users","india","linux-admins")
+    New-AdUserIfMissing "akumar" "Amit"  "Kumar" "Amit Kumar"  "akumar@${domain_fqdn}"  "${akumar_password}"  @("${lower(netbios)}-users","india")
 
     # ----------------------------------------------------------------------
     # RDP access for domain users (idempotent)
     # ----------------------------------------------------------------------
-    Write-Output "Ensuring RDP access for mcloud-users"
+    Write-Output "Ensuring RDP access for ${lower(netbios)}-users"
     try {
         Add-LocalGroupMember -Group "Remote Desktop Users" `
-            -Member "${netbios}\mcloud-users" -ErrorAction Stop
+            -Member "${netbios}\${lower(netbios)}-users" -ErrorAction Stop
     } catch {
         if ($_.Exception.Message -match "already a member") {
-            Write-Output "mcloud-users already in Remote Desktop Users"
+            Write-Output "${lower(netbios)}-users already in Remote Desktop Users"
         } else { throw }
     }
 

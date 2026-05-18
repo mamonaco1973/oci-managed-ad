@@ -32,7 +32,7 @@ All AD groups must have `gidNumber`. All AD users must have `gidNumber` and `uid
 IDs, not auto-mapped ones. Do not change this.
 
 Current ID assignments:
-- Groups: mcloud-users=10001, us=10002, india=10003, linux-admins=10004
+- Groups: {netbios_lower}-users=10001, us=10002, india=10003, linux-admins=10004
 - Users: jsmith=10001, edavis=10002, rpatel=10003, akumar=10004
 
 ## Account Passwords
@@ -42,7 +42,7 @@ Three separate password resources in `01-directory/accounts.tf`:
 - `admin_domain_password` — `Admin` domain admin account (created in sentinel post-promotion)
 - `windows_local_admin_password` — local fallback on DC and Windows client
 
-Domain user passwords (`jsmith`, `edavis`, `rpatel`, `akumar`) use `override_special = "!@#$%"`.
+Domain user passwords (`jsmith`, `edavis`, `rpatel`, `akumar`) use `override_special = "!@#%"`.
 Admin account passwords use `override_special = "_-"` — these are interpolated into PS templates.
 
 ## Scripts
