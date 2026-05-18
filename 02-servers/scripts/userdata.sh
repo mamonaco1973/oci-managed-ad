@@ -126,6 +126,10 @@ if [ -f /etc/sssd/sssd.conf ]; then
   sed -i 's/use_fully_qualified_names = True/use_fully_qualified_names = False/g' /etc/sssd/sssd.conf || true
   sed -i 's/ldap_id_mapping = True/ldap_id_mapping = False/g' /etc/sssd/sssd.conf || true
   sed -i 's|fallback_homedir = /home/%u@%d|fallback_homedir = /home/%u|g' /etc/sssd/sssd.conf || true
+  # Disable negative caching — Linux and Windows clients boot in parallel so AD users
+  # may not exist when SSSD first starts; without this, "user not found" gets cached
+  # and persists until sssd is restarted.
+  sed -i '/^\[domain\//a entry_negative_timeout = 0' /etc/sssd/sssd.conf || true
   chmod 600 /etc/sssd/sssd.conf || true
 fi
 
