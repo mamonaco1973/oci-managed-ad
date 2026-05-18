@@ -2,15 +2,15 @@
 
 This project deploys a production-grade **Windows Server 2022 Active Directory** environment on OCI using Terraform and automated configuration scripts. It provides a fully functional AD forest — domain controller, DNS, Kerberos, LDAP, Group Policy — without relying on a managed directory service.
 
-![diagram](oci-managed-ad.png)
+![diagram](oci-managed-directory.png)
 
-A Windows Server 2022 instance acts as both a Domain Controller and DNS server, integrated into a custom VCN with secure networking and OCI Bastion Service for private instance access. Windows and Linux client instances are also deployed and automatically domain-join at boot, enabling seamless AD authentication across platforms.
+Two Windows Server 2022 instances act as Domain Controllers and DNS servers, placed in different availability domains for redundancy, integrated into a custom VCN with secure networking and OCI Bastion Service for private instance access. Windows and Linux client instances are also deployed and automatically domain-join at boot, enabling seamless AD authentication across platforms.
 
 ---
 
-## Why Not a Managed Directory Service?
+## Why Roll Your Own?
 
-OCI Directory Service and similar managed offerings abstract away control. This solution gives you a real Windows AD DS forest — full Group Policy, schema extensions, POSIX attributes, native PowerShell AD cmdlets, and no vendor lock-in on directory semantics. You own the domain.
+Unlike AWS (Managed Microsoft AD), Azure (Entra Domain Services), and GCP (Managed Microsoft AD), **OCI has no managed Active Directory offering**. If you need Windows AD on OCI, this is the only option — deploy and operate it yourself on compute instances. This project automates that from zero using Terraform and cloudbase-init, with no manual steps required.
 
 ---
 
@@ -55,10 +55,10 @@ export OCI_COMPARTMENT_ID=<your-compartment-ocid>   # optional; falls back to te
 
 The deploy runs in two phases:
 
-1. **01-directory** — VCN, subnets, bastion, and the Windows Server 2022 DC. Terraform blocks until the DC writes a `dc-ready` sentinel to OCI Object Storage, confirming AD is fully initialized before DHCP options are updated.
+1. **01-directory** — VCN, subnets, bastion, and two Windows Server 2022 DCs. DC1 promotes first and writes a `dc1-ready` sentinel to OCI Object Storage. DC2 then starts, joins the existing domain, and writes `dc2-ready`. Terraform blocks until both sentinels confirm before updating DHCP options.
 2. **02-servers** — Windows and Linux client instances that domain-join automatically at first boot.
 
-Total build time is approximately 20–30 minutes end to end.
+Total build time is approximately 45–60 minutes end to end.
 
 ---
 
@@ -73,9 +73,10 @@ When the deployment completes, the following resources are created:
 - OCI Network Security Group with all required AD/DC port rules
 
 **Active Directory:**
-- Windows Server 2022 instance (VM.Standard.E4.Flex) as a Domain Controller
-- Private subnet placement — no public IP
-- VCN DHCP options updated to point DNS at the DC after the sentinel confirms readiness
+- Two Windows Server 2022 instances (VM.Standard.E4.Flex) as Domain Controllers (DC1 and DC2)
+- Different availability domains for redundancy
+- Private subnet placement — no public IPs
+- VCN DHCP options updated to point DNS at both DCs after both sentinels confirm readiness
 
 **Credentials:**
 - All account passwords generated randomly and stored as sensitive outputs in `terraform.tfstate`
