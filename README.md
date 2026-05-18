@@ -134,12 +134,6 @@ The DC has no public IP. Use `connect.sh` to create an OCI Bastion port-forwardi
 ./connect.sh 10.0.0.x   # connects to any private IP
 ```
 
-For RDP access, use `rdp-connect.sh` to open a tunnel to `localhost:3389`, then connect with your RDP client:
-
-```bash
-./rdp-connect.sh
-```
-
 ---
 
 ## Retrieving Passwords
