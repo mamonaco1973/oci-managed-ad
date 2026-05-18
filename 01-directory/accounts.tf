@@ -28,6 +28,8 @@ resource "local_file" "public_key" {
 resource "random_password" "administrator_password" {
   length           = 23
   special          = true
+  min_numeric      = 2
+  min_special      = 2
   # Restrict specials — password is interpolated into PS1 template strings
   override_special = "_-"
 }
@@ -35,12 +37,16 @@ resource "random_password" "administrator_password" {
 resource "random_password" "admin_domain_password" {
   length           = 23
   special          = true
+  min_numeric      = 2
+  min_special      = 2
   override_special = "_-"
 }
 
 resource "random_password" "windows_local_admin_password" {
   length           = 23
   special          = true
+  min_numeric      = 2
+  min_special      = 2
   override_special = "_-"
 }
 
@@ -53,6 +59,8 @@ resource "random_password" "windows_local_admin_password" {
 resource "random_password" "jsmith_password" {
   length           = 23
   special          = true
+  min_numeric      = 2
+  min_special      = 2
   # $ breaks PS1 double-quoted string interpolation — exclude it
   override_special = "!@#%"
 }
@@ -60,18 +68,24 @@ resource "random_password" "jsmith_password" {
 resource "random_password" "edavis_password" {
   length           = 23
   special          = true
+  min_numeric      = 2
+  min_special      = 2
   override_special = "!@#%"
 }
 
 resource "random_password" "rpatel_password" {
   length           = 23
   special          = true
+  min_numeric      = 2
+  min_special      = 2
   override_special = "!@#%"
 }
 
 resource "random_password" "akumar_password" {
   length           = 23
   special          = true
+  min_numeric      = 2
+  min_special      = 2
   override_special = "!@#%"
 }
 
