@@ -99,13 +99,8 @@ try {
     # ----------------------------------------------------------------------
     # AD user helper (idempotent)
     # ----------------------------------------------------------------------
-    $global:uidCounter = 10000
-
     function New-AdUserIfMissing {
-        param ($Username, $GivenName, $Surname, $DisplayName, $Email, $PlainPass, $Groups)
-
-        $global:uidCounter++
-        $uidNumber = $global:uidCounter
+        param ($Username, $GivenName, $Surname, $DisplayName, $Email, $PlainPass, $UidNumber, $Groups)
 
         $secPass = $PlainPass | ConvertTo-SecureString -AsPlainText -Force
         try {
@@ -121,14 +116,18 @@ try {
                 -Enabled           $true `
                 -Credential        $cred `
                 -PasswordNeverExpires $true `
-                -OtherAttributes   @{ gidNumber = 10001; uidNumber = $uidNumber } `
+                -OtherAttributes   @{ gidNumber = 10001; uidNumber = $UidNumber; uid = $Username } `
                 -ErrorAction Stop | Out-Null
-            Write-Output "Created user: $Username (uid=$uidNumber)"
+            Write-Output "Created user: $Username (uid=$UidNumber)"
         } catch {
             if ($_.Exception.Message -match "already exists") {
                 Write-Output "User already exists: $Username"
             } else { throw }
         }
+
+        # Ensure POSIX attributes are set even if user pre-existed
+        Set-ADUser -Identity $Username -Credential $cred `
+            -Replace @{ uidNumber = $UidNumber; gidNumber = 10001; uid = $Username }
 
         foreach ($group in $Groups) {
             try {
@@ -143,10 +142,10 @@ try {
     }
 
     Write-Output "Ensuring AD users exist"
-    New-AdUserIfMissing "jsmith"  "John"  "Smith" "John Smith"  "jsmith@${domain_fqdn}"  "${jsmith_password}"  @("${lower(netbios)}-users","us","linux-admins")
-    New-AdUserIfMissing "edavis" "Emily" "Davis" "Emily Davis" "edavis@${domain_fqdn}" "${edavis_password}" @("${lower(netbios)}-users","us")
-    New-AdUserIfMissing "rpatel" "Raj"   "Patel" "Raj Patel"   "rpatel@${domain_fqdn}"  "${rpatel_password}"  @("${lower(netbios)}-users","india","linux-admins")
-    New-AdUserIfMissing "akumar" "Amit"  "Kumar" "Amit Kumar"  "akumar@${domain_fqdn}"  "${akumar_password}"  @("${lower(netbios)}-users","india")
+    New-AdUserIfMissing "jsmith"  "John"  "Smith" "John Smith"  "jsmith@${domain_fqdn}"  "${jsmith_password}"  10001 @("${lower(netbios)}-users","us","linux-admins","Domain Admins")
+    New-AdUserIfMissing "edavis" "Emily" "Davis" "Emily Davis" "edavis@${domain_fqdn}" "${edavis_password}" 10002 @("${lower(netbios)}-users","us")
+    New-AdUserIfMissing "rpatel" "Raj"   "Patel" "Raj Patel"   "rpatel@${domain_fqdn}"  "${rpatel_password}"  10003 @("${lower(netbios)}-users","india","linux-admins","Domain Admins")
+    New-AdUserIfMissing "akumar" "Amit"  "Kumar" "Amit Kumar"  "akumar@${domain_fqdn}"  "${akumar_password}"  10004 @("${lower(netbios)}-users","india")
 
     # ----------------------------------------------------------------------
     # RDP access for domain users (idempotent)

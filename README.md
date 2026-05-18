@@ -108,10 +108,10 @@ The following users and groups are created automatically during provisioning.
 
 | Username | Full Name   | uidNumber | gidNumber | Groups                            |
 |----------|-------------|-----------|-----------|-----------------------------------|
-| jsmith   | John Smith  | 10001     | 10001     | mcloud-users, us, linux-admins    |
-| edavis   | Emily Davis | 10002     | 10001     | mcloud-users, us                  |
-| rpatel   | Raj Patel   | 10003     | 10001     | mcloud-users, india, linux-admins |
-| akumar   | Amit Kumar  | 10004     | 10001     | mcloud-users, india               |
+| jsmith   | John Smith  | 10001     | 10001     | mcloud-users, us, linux-admins, Domain Admins    |
+| edavis   | Emily Davis | 10002     | 10001     | mcloud-users, us                                 |
+| rpatel   | Raj Patel   | 10003     | 10001     | mcloud-users, india, linux-admins, Domain Admins |
+| akumar   | Amit Kumar  | 10004     | 10001     | mcloud-users, india                              |
 
 All users carry POSIX attributes (`uidNumber`, `gidNumber`). Linux clients use `ldap_id_mapping = False` so directory-assigned IDs are used directly.
 
