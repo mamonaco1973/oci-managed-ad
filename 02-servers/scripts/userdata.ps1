@@ -161,6 +161,17 @@ try {
     }
 
     # ----------------------------------------------------------------------
+    # Fix DNS suffix — OCI DHCP assigns mikecloud.com which mangles FQDNs.
+    # Registry SearchList overrides DHCP and survives the domain join reboot.
+    # ----------------------------------------------------------------------
+    Write-Output "Setting DNS suffix search list to ${domain_fqdn}"
+    Set-ItemProperty -Path 'HKLM:\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters' `
+        -Name 'SearchList' -Value "${domain_fqdn}"
+    $adapter = Get-NetAdapter | Where-Object { $_.Status -eq 'Up' } | Select-Object -First 1
+    Set-DnsClient -InterfaceIndex $adapter.InterfaceIndex `
+        -ConnectionSpecificSuffix "${domain_fqdn}"
+
+    # ----------------------------------------------------------------------
     # Reboot only if we just joined
     # ----------------------------------------------------------------------
     if ($didJoin) {
