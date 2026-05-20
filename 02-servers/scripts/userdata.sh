@@ -32,18 +32,6 @@ ADMIN_USERNAME="Admin"
 ADMIN_PASSWORD="${admin_password}"
 DOMAIN_FQDN="${domain_fqdn}"
 
-# Pin DNS immediately — systemd-resolved stub (127.0.0.53) blocks DC resolution.
-# Must run before any wait loops so 8.8.8.8 handles external names if DC is slow.
-systemctl stop systemd-resolved || true
-systemctl disable systemd-resolved || true
-[ -L /etc/resolv.conf ] && rm -f /etc/resolv.conf
-cat > /etc/resolv.conf <<EOF
-search ${domain_fqdn}
-nameserver ${dc_ip}
-nameserver 8.8.8.8
-EOF
-chattr +i /etc/resolv.conf || true
-
 echo "Waiting for DNS resolution..."
 until nslookup us.archive.ubuntu.com >/dev/null 2>&1; do
   echo "DNS not ready yet, retrying in 30s..."
@@ -126,10 +114,12 @@ if [ -f /etc/sssd/sssd.conf ]; then
   sed -i 's/use_fully_qualified_names = True/use_fully_qualified_names = False/g' /etc/sssd/sssd.conf || true
   sed -i 's/ldap_id_mapping = True/ldap_id_mapping = False/g' /etc/sssd/sssd.conf || true
   sed -i 's|fallback_homedir = /home/%u@%d|fallback_homedir = /home/%u|g' /etc/sssd/sssd.conf || true
-  # Disable negative caching — Linux and Windows clients boot in parallel so AD users
-  # may not exist when SSSD first starts; without this, "user not found" gets cached
-  # and persists until sssd is restarted.
-  sed -i '/^\[domain\//a entry_negative_timeout = 0' /etc/sssd/sssd.conf || true
+  # entry_negative_timeout belongs in [nss], not [domain] — prevents caching
+  # "not found" for users queried before Windows finishes seeding them.
+  sed -i '/^\[nss\]/a entry_negative_timeout = 0' /etc/sssd/sssd.conf || true
+  # Cap offline retry backoff — default exponential backoff can leave SSSD
+  # offline for hours after a transient DC hiccup.
+  sed -i '/^\[domain\//a offline_timeout = 60' /etc/sssd/sssd.conf || true
   chmod 600 /etc/sssd/sssd.conf || true
 fi
 
