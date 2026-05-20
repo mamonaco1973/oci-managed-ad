@@ -143,26 +143,4 @@ netfilter-persistent save
 
 realm list || true
 
-# Windows client seeds AD users in parallel — they may not exist when SSSD first
-# starts. Loop until all four users are visible; restart sssd if still absent after 30 min.
-echo "Waiting for AD users to be visible via SSSD..."
-for i in $(seq 1 60); do
-  if id jsmith >/dev/null 2>&1 && id edavis >/dev/null 2>&1 && \
-     id rpatel >/dev/null 2>&1 && id akumar >/dev/null 2>&1; then
-    echo "All AD users visible after $((i * 30))s"
-    break
-  fi
-  if [ "$i" -eq 60 ]; then
-    echo "WARN: AD users not visible after 30 minutes — restarting sssd"
-    systemctl restart sssd || true
-  else
-    echo "AD users not visible yet ($i/60), retrying in 30s..."
-    sleep 30
-  fi
-done
-sleep 150
-systemctl restart sssd
-sleep 150 
-systemctl restart sssd
-
 echo "user-data complete: $(date -Is)"
