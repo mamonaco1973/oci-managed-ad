@@ -170,5 +170,9 @@ for i in $(seq 1 60); do
     sleep 30
   fi
 done
+sleep 150
+systemctl restart sssd
+sleep 150 
+systemctl restart sssd
 
 echo "user-data complete: $(date -Is)"
