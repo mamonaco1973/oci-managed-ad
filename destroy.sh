@@ -23,9 +23,9 @@ TENANCY_OCID=$(awk -F'=' '/^tenancy[[:space:]]*=/{gsub(/[[:space:]]/, "", $2); p
 export TF_VAR_tenancy_ocid="$TENANCY_OCID"
 
 # Uncomment to destroy a non-default domain (must match what was applied)
-export TF_VAR_dns_zone="rstudio.mikecloud.com"
-export TF_VAR_realm="RSTUDIO.MIKECLOUD.COM"
-export TF_VAR_netbios="RSTUDIO"
+#export TF_VAR_dns_zone="rstudio.mikecloud.com"
+#export TF_VAR_realm="RSTUDIO.MIKECLOUD.COM"
+#export TF_VAR_netbios="RSTUDIO"
 
 # ------------------------------------------------------------------------------
 # Phase 1: Destroy Client Instances
