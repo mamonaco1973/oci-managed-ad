@@ -1,6 +1,6 @@
 # OCI Managed Active Directory
 
-This project deploys a production-grade **Windows Server 2022 Active Directory** environment on OCI using Terraform and automated configuration scripts. It provides a fully functional AD forest — domain controller, DNS, Kerberos, LDAP, Group Policy — without relying on a managed directory service.
+This project deploys a production-grade **Windows Server 2022 Active Directory** environment on OCI using Terraform and automated configuration scripts. It provides a fully functional AD forest — domain controller, DNS, Kerberos, LDAP, Group Policy — without relying on a managed directory service. The Active Directory infrastructure is provisioned via the reusable [module-oci-managed-ad](https://github.com/mamonaco1973/module-oci-managed-ad) Terraform module.
 
 ![diagram](oci-managed-directory.png)
 
