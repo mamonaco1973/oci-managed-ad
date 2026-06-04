@@ -6,6 +6,10 @@ This project deploys a production-grade **Windows Server 2022 Active Directory**
 
 Two Windows Server 2022 instances act as Domain Controllers and DNS servers, placed in different availability domains for redundancy, integrated into a custom VCN with secure networking and OCI Bastion Service for private instance access. Windows and Linux client instances are also deployed and automatically domain-join at boot, enabling seamless AD authentication across platforms.
 
+See it in action — full deployment walkthrough below.
+
+[![Watch the video](https://img.youtube.com/vi/-6BR1ZyD_Ts/maxresdefault.jpg)](https://www.youtube.com/watch?v=-6BR1ZyD_Ts)
+
 ---
 
 ## Why Roll Your Own?
